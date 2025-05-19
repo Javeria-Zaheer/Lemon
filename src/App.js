@@ -26,7 +26,7 @@ function App() {
 
   return (
     <div style={{ padding: "20px" }}>
-      <h2>{isLogin ? "Javeria" : "Zaheer"}</h2>
+      <h2>{isLogin ? "Login" : "Register"}</h2>
       <input
         type="email"
         placeholder="Email"
