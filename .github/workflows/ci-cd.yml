@@ -1,0 +1,47 @@
+name: Firebase Auth App CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: ⬇️ Checkout code
+      uses: actions/checkout@v3
+
+    - name: 🟢 Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: 📦 Install dependencies
+      run: npm install
+
+    - name: 🔎 Run Tests
+      run: npm test
+
+    - name: 🐳 Build Docker image
+      run: docker build -t firebase-auth-app .
+
+    - name: 🚀 Push to DockerHub (optional)
+      if: github.ref == 'refs/heads/main'
+      run: |
+        echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+        docker tag firebase-auth-app ${{ secrets.DOCKER_USERNAME }}/firebase-auth-app
+        docker push ${{ secrets.DOCKER_USERNAME }}/firebase-auth-app
+
+
+    - name: 🔐 Deploy to Firebase Hosting
+      uses: w9jds/firebase-action@v13.2.2
+      with:
+        args: deploy --only hosting
+      env:
+        FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
